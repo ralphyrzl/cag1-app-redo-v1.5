@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>MyMonies™</title>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4">MyMonies™ - Money Tracker</h1>
+      <form action="/add" method="POST" class="mb-4">
+        <div class="form-row">
+          <div class="form-group col-md-3">
+            <input
+              type="number"
+              name="amount"
+              class="form-control"
+              placeholder="Amount"
+              required
+            />
+          </div>
+          <div class="form-group col-md-3">
+            <select name="type" class="form-control" required>
+              <option value="Income">Income</option>
+              <option value="Expense">Expense</option>
+            </select>
+          </div>
+          <div class="form-group col-md-3">
+            <input
+              type="text"
+              name="entity"
+              class="form-control"
+              placeholder="Entity"
+              required
+            />
+          </div>
+          <div class="form-group col-md-3">
+            <input
+              type="text"
+              name="remarks"
+              class="form-control"
+              placeholder="Remarks"
+            />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Transaction</button>
+      </form>
+      <h2>Transaction List</h2>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Type</th>
+            <th>Entity</th>
+            <th>Details</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% transactions.forEach(transaction => { %>
+          <tr>
+            <td><%= transaction.id %></td>
+            <td><%= transaction.type %></td>
+            <td><%= transaction.entity %></td>
+            <td>
+              <!-- read mode -->
+              <div id="divAmount_<%= transaction.id %>">
+                <div>
+                  Amount:
+                  <span id="amount_<%= transaction.id %>">
+                    <%= transaction.amount %>
+                  </span>
+                </div>
+              </div>
+              <div id="divRemarks_<%= transaction.id %>">
+                <div>
+                  Remarks:
+                  <span id="remarks_<%= transaction.id %>">
+                    <%= transaction.remarks %>
+                  </span>
+                </div>
+              </div>
+              <!-- edit mode -->
+              <form
+                action="/update/<%= transaction.id %>"
+                method="POST"
+                class="d-none"
+                id="updateForm_<%= transaction.id %>"
+              >
+                <div class="form-group">
+                  Amount:
+                  <input
+                    type="number"
+                    name="amount"
+                    class="form-control"
+                    value="<%= transaction.amount %>"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  Remarks:
+                  <input
+                    type="text"
+                    name="remarks"
+                    class="form-control"
+                    value="<%= transaction.remarks %>"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-success">Save</button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  onclick="cancelEdit('<%= transaction.id %>')"
+                >
+                  Cancel
+                </button>
+              </form>
+            </td>
+            <td>
+              <%= new Date(transaction.date).toLocaleDateString() %> <%= new
+              Date(transaction.date).toLocaleTimeString() %>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-warning btn-sm"
+                onclick="toggleEdit('<%= transaction.id %>')"
+              >
+                Edit
+              </button>
+              <form
+                action="/delete/<%= transaction.id %>"
+                method="POST"
+                class="d-inline"
+              >
+                <button type="submit" class="btn btn-danger btn-sm">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      function toggleEdit(id) {
+        const amountSpan = document.getElementById(`amount_${id}`);
+        const remarksSpan = document.getElementById(`remarks_${id}`);
+        const updateForm = document.getElementById(`updateForm_${id}`);
+        const divAmount = document.getElementById(`divAmount_${id}`);
+        const divRemarks = document.getElementById(`divRemarks_${id}`);
+
+        if (amountSpan && remarksSpan && updateForm) {
+          amountSpan.style.display = "none";
+          remarksSpan.style.display = "none";
+
+          // read-only fields
+          divAmount.style.display = "none";
+          divRemarks.style.display = "none";
+
+          updateForm.classList.remove("d-none");
+        }
+      }
+
+      function cancelEdit(id) {
+        const amountSpan = document.getElementById(`amount_${id}`);
+        const remarksSpan = document.getElementById(`remarks_${id}`);
+        const updateForm = document.getElementById(`updateForm_${id}`);
+        const divAmount = document.getElementById(`divAmount_${id}`);
+        const divRemarks = document.getElementById(`divRemarks_${id}`);
+
+        // read-only fields
+        divAmount.style.display = "inline";
+        divRemarks.style.display = "inline";
+
+        if (amountSpan && remarksSpan && updateForm) {
+          amountSpan.style.display = "inline";
+          remarksSpan.style.display = "inline";
+          updateForm.classList.add("d-none");
+        }
+      }
+    </script>
+  </body>
+</html>
